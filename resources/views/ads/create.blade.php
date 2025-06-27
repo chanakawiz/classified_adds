@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('content')
@@ -14,8 +15,26 @@
             </div>
         @endif
 
-        <form action="{{ route('ads.store') }}" method="POST" class="space-y-6">
+        <form method="POST" action="{{ route('ads.store') }}" enctype="multipart/form-data" class="space-y-6">
             @csrf
+
+            <div>
+                <label class="block font-medium text-gray-700 mb-2">Upload Images (Max 6)</label>
+
+                <!-- Hidden File Input -->
+                <input type="file" name="images[]" id="imageInput" multiple accept="image/*" class="hidden">
+
+                <!-- Custom Upload Grid -->
+                <div id="previewContainer" class="grid grid-cols-3 gap-4">
+                    @for ($i = 0; $i < 6; $i++)
+                        <div class="relative border-2 border-dashed border-gray-300 rounded-lg h-32 flex items-center justify-center cursor-pointer upload-frame"
+                             onclick="document.getElementById('imageInput').click()" data-index="{{ $i }}">
+                            <span class="text-gray-400 text-sm text-center pointer-events-none">Click to Upload</span>
+                        </div>
+                    @endfor
+                </div>
+                <small class="text-gray-500 block mt-2">Click a frame to add or replace an image. Max 6 images allowed.</small>
+            </div>
 
             <div>
                 <label class="block font-medium text-gray-700">Title</label>
@@ -68,4 +87,60 @@
             </div>
         </form>
     </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('previewContainer');
+        let selectedFiles = [];
+
+        imageInput.addEventListener('change', function (e) {
+            const newFiles = Array.from(e.target.files);
+
+            if ((selectedFiles.length + newFiles.length) > 6) {
+                alert("You can upload up to 6 images.");
+                imageInput.value = "";
+                return;
+            }
+
+            newFiles.forEach(file => {
+                if (selectedFiles.length >= 6) return;
+                const fileId = Date.now() + Math.random();
+                selectedFiles.push({ id: fileId, file });
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const emptyFrame = previewContainer.querySelector('.upload-frame:not(.has-image)');
+                    if (emptyFrame) {
+                        emptyFrame.innerHTML = `
+                            <img src="${event.target.result}" class="w-full h-full object-cover rounded" />
+                            <button type="button" class="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full remove-btn" data-id="${fileId}">×</button>
+                        `;
+                        emptyFrame.classList.add('has-image');
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+
+            updateFileInput();
+        });
+
+        previewContainer.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-btn')) {
+                const id = e.target.getAttribute('data-id');
+                selectedFiles = selectedFiles.filter(f => f.id != id);
+
+                const frame = e.target.closest('.upload-frame');
+                frame.classList.remove('has-image');
+                frame.innerHTML = '<span class="text-gray-400 text-sm text-center pointer-events-none">Click to Upload</span>';
+
+                updateFileInput();
+            }
+        });
+
+        function updateFileInput() {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(fileObj => dataTransfer.items.add(fileObj.file));
+            imageInput.files = dataTransfer.files;
+        }
+    </script>
 @endsection

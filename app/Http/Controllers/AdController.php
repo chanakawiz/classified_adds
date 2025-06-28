@@ -26,14 +26,18 @@ class AdController extends Controller
             'price' => 'nullable|numeric',
             'contact_email' => 'nullable|email',
             'contact_phone' => 'nullable|string|max:20',
-            'images.*' => 'nullable|image|max:2048', // accept images up to 2MB
+            'images.*' => 'nullable|image',
         ]);
 
-        $ad = Ad::create($request->only([
-            'title', 'description', 'category_id', 'price', 'contact_email', 'contact_phone'
-        ]));
-
-
+        $ad = Ad::create([
+            'user_id' => auth()->id(),
+            'title' => $request->title,
+            'description' => $request->description,
+            'category_id' => $request->category_id,
+            'price' => $request->price,
+            'contact_email' => $request->contact_email,
+            'contact_phone' => $request->contact_phone,
+        ]);
 
         if ($request->hasFile('images')) {
             foreach (array_slice($request->file('images'), 0, 6) as $image) {
@@ -43,8 +47,6 @@ class AdController extends Controller
             Log::error('No images uploaded!');
         }
 
-
         return redirect('/')->with('success', 'Ad created successfully!');
-
     }
 }

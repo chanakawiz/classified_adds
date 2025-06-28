@@ -20,6 +20,7 @@ class Ad extends Model implements HasMedia
         'price',
         'contact_email',
         'contact_phone',
+        'user_id'
     ];
 
     /**

@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Log;
 
 class AdController extends Controller
 {
+    protected static $middleware = [
+        'auth'
+    ];
+
     // Show the ad creation form
     public function create()
     {
@@ -19,7 +23,11 @@ class AdController extends Controller
     // Handle form submission
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'You must be logged in to post an ad.');
+        }
+
+        $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'category_id' => 'required|exists:categories,id',
@@ -29,15 +37,14 @@ class AdController extends Controller
             'images.*' => 'nullable|image',
         ]);
 
-        $ad = Ad::create([
-            'user_id' => auth()->id(),
-            'title' => $request->title,
-            'description' => $request->description,
-            'category_id' => $request->category_id,
-            'price' => $request->price,
-            'contact_email' => $request->contact_email,
-            'contact_phone' => $request->contact_phone,
-        ]);
+        $ad = new Ad();
+        $ad->user_id = auth()->id(); // <-- Set the user_id from the logged-in user
+        $ad->title = $request->title;
+        $ad->description = $request->description;
+        $ad->category_id = $request->category_id;
+        $ad->price = $request->price;
+        $ad->contact_email = $request->contact_email;
+        $ad->contact_phone = $request->contact_phone;
 
         if ($request->hasFile('images')) {
             foreach (array_slice($request->file('images'), 0, 6) as $image) {
@@ -46,6 +53,8 @@ class AdController extends Controller
         } else {
             Log::error('No images uploaded!');
         }
+
+        $ad->save();
 
         return redirect('/')->with('success', 'Ad created successfully!');
     }

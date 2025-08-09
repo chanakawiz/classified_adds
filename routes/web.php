@@ -19,6 +19,7 @@ Route::middleware('web')->group(function () {
     Route::middleware('auth')->group(function () {
         Route::get('/ads/create', [AdController::class, 'create'])->name('ads.create');
         Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
+    Route::get('/ads/{ad}', [AdController::class, 'show'])->name('ads.show');
     });
 
     Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categories.show');

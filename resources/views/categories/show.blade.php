@@ -45,7 +45,7 @@
                             <span class="text-indigo-700 font-extrabold text-lg">
                                 LKR {{ number_format($ad->price, 2) }}
                             </span>
-                            <a href="#"
+                            <a href="{{ route('ads.show', $ad) }}"
                                class="text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-700 hover:to-blue-700 text-white px-5 py-2 rounded-full shadow transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-400">
                                 View Details
                             </a>
@@ -70,4 +70,7 @@
         </div>
     @endif
 </div>
+
+<!-- Modal removed; details open in dedicated page -->
+
 @endsection

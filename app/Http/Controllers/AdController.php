@@ -43,6 +43,17 @@ class AdController extends Controller
             'images.*' => 'nullable|image',
         ]);
 
+        // Ensure the selected district belongs to the selected province
+        $districtBelongsToProvince = District::where('id', $request->district_id)
+            ->where('province_id', $request->province_id)
+            ->exists();
+
+        if (! $districtBelongsToProvince) {
+            return back()
+                ->withErrors(['district_id' => 'Selected district does not belong to the chosen province.'])
+                ->withInput();
+        }
+
         $ad = new Ad();
         $ad->user_id = Auth::id(); // <-- Set the user_id from the logged-in user
         $ad->title = $request->title;
@@ -65,5 +76,13 @@ class AdController extends Controller
         $ad->save();
 
         return redirect('/')->with('success', 'Ad created successfully!');
+    }
+
+    // Show single ad details page
+    public function show(Ad $ad)
+    {
+        return view('ads.show', [
+            'ad' => $ad->load(['category', 'province', 'district', 'media']),
+        ]);
     }
 }

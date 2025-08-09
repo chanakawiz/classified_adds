@@ -41,6 +41,28 @@
         toggleBtn.setAttribute('aria-expanded', String(!expanded));
       });
     }
+
+    // Side drawer for categories (not on home)
+    const sideToggle = document.querySelector('[data-side-nav-toggle]');
+    const sideCloseBtns = document.querySelectorAll('[data-side-nav-close]');
+    const side = document.getElementById('sideNav');
+    const sideBackdrop = document.getElementById('sideNavBackdrop');
+
+    function openSide(){
+      if (!side) return;
+      side.classList.remove('-translate-x-full');
+      sideBackdrop && sideBackdrop.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+    function closeSide(){
+      if (!side) return;
+      side.classList.add('-translate-x-full');
+      sideBackdrop && sideBackdrop.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+    sideToggle && sideToggle.addEventListener('click', openSide);
+    sideCloseBtns.forEach(btn => btn.addEventListener('click', closeSide));
+    sideBackdrop && sideBackdrop.addEventListener('click', closeSide);
   });
 })();
 

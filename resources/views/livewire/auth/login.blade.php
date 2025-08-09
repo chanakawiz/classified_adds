@@ -11,7 +11,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.auth')] class extends Component {
+new #[Layout('components.layouts.auth', ['title' => 'Sign in - Classified Ads'])] class extends Component {
     #[Validate('required|string|email')]
     public string $email = '';
 
@@ -40,7 +40,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $redirect = auth()->user() && (auth()->user()->role === 'admin')
+            ? url('/admin')
+            : route('home', absolute: false);
+
+        $this->redirect($redirect, navigate: true);
     }
 
     /**
@@ -74,7 +78,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+    <x-auth-header :title="__('Sign in to Classified Ads')" :description="__('Enter your email and password below to continue')" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />

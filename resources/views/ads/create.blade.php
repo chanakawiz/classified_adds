@@ -61,6 +61,29 @@
             </select>
         </div>
 
+        {{-- Location --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block font-semibold text-indigo-700 mb-1">Province</label>
+                <select name="province_id" id="province" required
+                        class="w-full border border-indigo-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-indigo-50 text-gray-800 font-medium transition">
+                    <option value="">Select a Province</option>
+                    @foreach ($provinces as $province)
+                        <option value="{{ $province->id }}" {{ old('province_id') == $province->id ? 'selected' : '' }}>
+                            {{ $province->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold text-indigo-700 mb-1">District</label>
+                <select name="district_id" id="district" required
+                        class="w-full border border-indigo-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-indigo-50 text-gray-800 font-medium transition">
+                    <option value="">Select a District</option>
+                </select>
+            </div>
+        </div>
+
         {{-- Price --}}
         <div>
             <label class="block font-semibold text-indigo-700 mb-1">Price (LKR)</label>
@@ -150,6 +173,40 @@
         const dataTransfer = new DataTransfer();
         selectedFiles.forEach(fileObj => dataTransfer.items.add(fileObj.file));
         imageInput.files = dataTransfer.files;
+    }
+
+    // Province -> District dependent dropdown
+    const provinceSelect = document.getElementById('province');
+    const districtSelect = document.getElementById('district');
+    const oldDistrict = "{{ old('district_id') }}";
+
+    async function fetchDistricts(provinceId) {
+        districtSelect.innerHTML = '<option value="">Loading...</option>';
+        try {
+            const res = await fetch(`/api/provinces/${provinceId}/districts`);
+            const data = await res.json();
+            districtSelect.innerHTML = '<option value="">Select a District</option>';
+            data.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.id;
+                opt.textContent = d.name;
+                if (String(d.id) === String(oldDistrict)) opt.selected = true;
+                districtSelect.appendChild(opt);
+            });
+        } catch (e) {
+            districtSelect.innerHTML = '<option value="">Select a District</option>';
+        }
+    }
+
+    provinceSelect?.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val) fetchDistricts(val);
+        else districtSelect.innerHTML = '<option value="">Select a District</option>';
+    });
+
+    // If province preselected (validation error), load districts
+    if (provinceSelect && provinceSelect.value) {
+        fetchDistricts(provinceSelect.value);
     }
 </script>
 @endsection

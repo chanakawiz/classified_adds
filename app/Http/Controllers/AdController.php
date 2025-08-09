@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Ad;
 use App\Models\Category;
+use App\Models\Province;
+use App\Models\District;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class AdController extends Controller
 {
@@ -17,13 +20,14 @@ class AdController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('ads.create', compact('categories'));
+        $provinces = Province::orderBy('name')->get();
+        return view('ads.create', compact('categories', 'provinces'));
     }
 
     // Handle form submission
     public function store(Request $request)
     {
-        if (!auth()->check()) {
+        if (!Auth::check()) {
             return redirect()->route('login')->with('error', 'You must be logged in to post an ad.');
         }
 
@@ -34,14 +38,18 @@ class AdController extends Controller
             'price' => 'nullable|numeric',
             'contact_email' => 'nullable|email',
             'contact_phone' => 'nullable|string|max:20',
+            'province_id' => 'required|exists:provinces,id',
+            'district_id' => 'required|exists:districts,id',
             'images.*' => 'nullable|image',
         ]);
 
         $ad = new Ad();
-        $ad->user_id = auth()->id(); // <-- Set the user_id from the logged-in user
+        $ad->user_id = Auth::id(); // <-- Set the user_id from the logged-in user
         $ad->title = $request->title;
         $ad->description = $request->description;
         $ad->category_id = $request->category_id;
+        $ad->province_id = $request->province_id;
+        $ad->district_id = $request->district_id;
         $ad->price = $request->price;
         $ad->contact_email = $request->contact_email;
         $ad->contact_phone = $request->contact_phone;

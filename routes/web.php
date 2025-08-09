@@ -16,15 +16,22 @@ Route::middleware('web')->group(function () {
 
     Route::get('/search', [SearchController::class, 'search'])->name('search');
 
-    Route::get('/ads/create', [AdController::class, 'create'])->name('ads.create');
-    Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
+    Route::middleware('auth')->group(function () {
+        Route::get('/ads/create', [AdController::class, 'create'])->name('ads.create');
+        Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
+    });
 
     Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categories.show');
 });
 
 
 
-Route::view('dashboard', 'dashboard') ->middleware(['auth', 'verified']) ->name('dashboard');
+Route::view('dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('dashboard');
+
+// Example of admin-only web routes (Filament also protected separately)
+Route::middleware(['auth', 'admin'])->group(function () {
+    // Add any custom admin web routes here if needed.
+});
 
 Route::middleware(['auth'])->group(function () {
 

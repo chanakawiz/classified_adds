@@ -26,7 +26,8 @@ class User extends Authenticatable
         'last_name',
         'avatar_url',
         'is_verified',
-        'timezone'
+        'timezone',
+        'role'
     ];
 
     /**

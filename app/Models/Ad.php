@@ -20,7 +20,9 @@ class Ad extends Model implements HasMedia
         'price',
         'contact_email',
         'contact_phone',
-        'user_id'
+        'user_id',
+        'province_id',
+        'district_id',
     ];
 
     /**
@@ -29,6 +31,16 @@ class Ad extends Model implements HasMedia
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(Province::class);
+    }
+
+    public function district(): BelongsTo
+    {
+        return $this->belongsTo(District::class);
     }
 
     public function registerMediaConversions(Media $media = null): void

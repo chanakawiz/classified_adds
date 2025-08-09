@@ -8,7 +8,7 @@ use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.auth')] class extends Component {
+new #[Layout('components.layouts.auth', ['title' => 'Sign up - Classified Ads'])] class extends Component {
     public string $name = '';
     public string $email = '';
     public string $password = '';
@@ -31,12 +31,16 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         Auth::login($user);
 
-        $this->redirectIntended(route('dashboard', absolute: false), navigate: true);
+        $redirect = ($user->role ?? 'user') === 'admin'
+            ? url('/admin')
+            : route('home', absolute: false);
+
+        $this->redirect($redirect, navigate: true);
     }
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
+    <x-auth-header :title="__('Create your Classified Ads account')" :description="__('Fill in the details below to get started')" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
